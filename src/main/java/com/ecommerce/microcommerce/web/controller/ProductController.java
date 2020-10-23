@@ -1,9 +1,11 @@
 package com.ecommerce.microcommerce.web.controller;
 
 import com.ecommerce.microcommerce.model.Product;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -52,11 +54,14 @@ public class ProductController {
     @PostMapping(value = "/addProduit")
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
-        productList.add(product);
         Product productAdded = product;
 
         if (productAdded == null)
             return ResponseEntity.noContent().build();
+
+        if(productAdded.getPrix()==0){
+            //return new ProduitGratuitException();
+        }
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -64,20 +69,25 @@ public class ProductController {
                 .buildAndExpand(productAdded.getId())
                 .toUri();
 
+        productList.add(productAdded);
+
         return ResponseEntity.created(location).build();
     }
 
     // supprimer un produit
-    @DeleteMapping("deleteProduitById")
-    public void supprimerProduit(@PathVariable(value = "id") int id) {
-        Product produitSupp = productList.stream().filter(product -> product.getId() == id).collect(Collectors.toList()).get(0);
-        productList.remove(produitSupp);
+    @DeleteMapping("deleteProduit")
+    public List<Product> supprimerProduit(@Valid @RequestBody Product product) {
+        Product productDelete = productList.stream().filter(res -> res.getId() == product.getId()).collect(Collectors.toList()).get(0);
+        productList.remove(productDelete);
+        return productList;
     }
 
     // Mettre à jour un produit
     @PostMapping("updateProduit")
     public void updateProduit(@RequestBody Product product) {
-        productList.set( product.getId() , product);
+        Product productUpdate = productList.stream().filter(res -> res.getId() == product.getId()).collect(Collectors.toList()).get(0);
+        productList.set( productList.indexOf(productUpdate) , product);
+        productList.remove(productUpdate);
     }
 
     @GetMapping("AdminProduits")
