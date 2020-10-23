@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
 @RestController
 public class ProductController {
 
+    public static List<Product> getProductList() {
+        return productList;
+    }
+
     private static List<Product> productList = new ArrayList<Product>();
 
     static {
@@ -53,26 +57,15 @@ public class ProductController {
 
     //ajouter un produit
     @PostMapping(value = "/addProduit")
-    public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
-        System.out.println(product.getPrix());
+    public void ajouterProduit(@Valid @RequestBody Product product) {
         if(product.getPrix()==0){
             throw new ProduitGratuitException("ERROR 403 : Prix du produit égal à zéro");
         }
 
         Product productAdded = product;
 
-        if (productAdded == null)
-            return ResponseEntity.noContent().build();
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(productAdded.getId())
-                .toUri();
-
-        productList.add(productAdded);
-
-        return ResponseEntity.created(location).build();
+        if (productAdded != null)
+            productList.add(productAdded);
     }
 
     // supprimer un produit

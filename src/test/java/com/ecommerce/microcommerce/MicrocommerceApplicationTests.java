@@ -1,5 +1,7 @@
 package com.ecommerce.microcommerce;
 
+import com.ecommerce.microcommerce.model.Product;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
