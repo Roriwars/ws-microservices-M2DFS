@@ -1,56 +1,58 @@
 package com.ecommerce.microcommerce.web.controller;
 
-import com.ecommerce.microcommerce.dao.ProductDao;
 import com.ecommerce.microcommerce.model.Product;
-import com.ecommerce.microcommerce.web.exceptions.ProduitIntrouvableException;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
-
-
+@RestController
 public class ProductController {
 
-    @Autowired
-    private ProductDao productDao;
+    private static List<Product> productList = new ArrayList<Product>();
+
+    static {
+        // create static bd
+        productList = new ArrayList<Product>();
+        Product product = new Product(1,"banane",2, 1);
+        productList.add(product);
+        product = new Product(2,"pomme",3, 2);
+        productList.add(product);
+        product = new Product(3,"fraise",5, 3);
+        productList.add(product);
+        product = new Product(4,"cerise",4, 2);
+        productList.add(product);
+        product = new Product(5,"concombre",4, 1);
+        productList.add(product);
+        product = new Product(6,"poire",3, 2);
+        productList.add(product);
+    }
 
 
     //Récupérer la liste des produits
-    @RequestMapping(value = "/Produits", method = RequestMethod.GET)
-    public MappingJacksonValue listeProduits() {
-        Iterable<Product> produits = productDao.findAll();
-        SimpleBeanPropertyFilter monFiltre = SimpleBeanPropertyFilter.serializeAllExcept("prixAchat");
-        FilterProvider listDeNosFiltres = new SimpleFilterProvider().addFilter("monFiltreDynamique", monFiltre);
-        MappingJacksonValue produitsFiltres = new MappingJacksonValue(produits);
-        produitsFiltres.setFilters(listDeNosFiltres);
-        return produitsFiltres;
+    @RequestMapping(value = "/getProducts", method = RequestMethod.GET)
+    public List<Product> listeProduits() {
+        return productList;
     }
-
 
     //Récupérer un produit par son Id
-    public Product afficherUnProduit() {
-        return null;
+    @GetMapping("/getProductById/{id}")
+    public Product afficherUnProduit(@PathVariable(value = "id") int id) {
+        return productList.stream().filter(product -> product.getId() == id).collect(Collectors.toList()).get(0);
     }
 
-
-
-
     //ajouter un produit
-    @PostMapping(value = "/Produits")
+    @PostMapping(value = "/addProduct")
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
-        Product productAdded =  productDao.save(product);
+        productList.add(product);
+        Product productAdded = product;
 
         if (productAdded == null)
             return ResponseEntity.noContent().build();
@@ -65,19 +67,33 @@ public class ProductController {
     }
 
     // supprimer un produit
-    public void supprimerProduit() {
+    @DeleteMapping("deleteProductById")
+    public void supprimerProduit(@PathVariable(value = "id") int id) {
+        Product produitSupp = productList.stream().filter(product -> product.getId() == id).collect(Collectors.toList()).get(0);
+        productList.remove(produitSupp);
     }
 
     // Mettre à jour un produit
+    @PostMapping("updateProduct")
     public void updateProduit(@RequestBody Product product) {
+        productList.set( product.getId() , product);
+    }
+
+    @GetMapping("AdminProduits")
+    public HashMap<Product,Integer> calculerMargeProduit(){
+        HashMap<Product,Integer> listeMarge = new HashMap<Product, Integer>();
+        for(Product p : productList){
+            listeMarge.put(p,p.getPrix()-p.getPrixAchat());
+        }
+        return listeMarge;
     }
 
 
     //Pour les tests
-    @GetMapping(value = "test/produits/{prix}")
+    /*@GetMapping(value = "test/produits/{prix}")
     public List<Product>  testeDeRequetes(@PathVariable int prix) {
-        return productDao.chercherUnProduitCher(400);
-    }
+        return productList.chercherUnProduitCher(400);
+    }*/
 
 
 
