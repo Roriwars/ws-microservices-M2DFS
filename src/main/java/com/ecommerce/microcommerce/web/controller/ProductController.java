@@ -1,6 +1,7 @@
 package com.ecommerce.microcommerce.web.controller;
 
 import com.ecommerce.microcommerce.model.Product;
+import com.ecommerce.microcommerce.web.exceptions.ProduitGratuitException;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,15 +54,15 @@ public class ProductController {
     //ajouter un produit
     @PostMapping(value = "/addProduit")
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
+        System.out.println(product.getPrix());
+        if(product.getPrix()==0){
+            throw new ProduitGratuitException("ERROR 403 : Prix du produit égal à zéro");
+        }
 
         Product productAdded = product;
 
         if (productAdded == null)
             return ResponseEntity.noContent().build();
-
-        if(productAdded.getPrix()==0){
-            //return new ProduitGratuitException();
-        }
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -85,8 +86,12 @@ public class ProductController {
     // Mettre à jour un produit
     @PostMapping("updateProduit")
     public void updateProduit(@RequestBody Product product) {
+        if(product.getPrix()==0){
+            throw new ProduitGratuitException("ERROR 403 : Prix du produit égal à zéro");
+        }
         Product productUpdate = productList.stream().filter(res -> res.getId() == product.getId()).collect(Collectors.toList()).get(0);
-        productList.set( productList.indexOf(productUpdate) , product);
+        Product productNew = new Product(product.getId(),product.getNom(),product.getPrix(),product.getPrixAchat());
+        productList.set( productList.indexOf(productUpdate) , productNew);
         productList.remove(productUpdate);
     }
 
