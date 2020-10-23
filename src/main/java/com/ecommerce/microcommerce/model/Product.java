@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.Min;
+import java.util.Comparator;
 
 @Entity
 //@JsonFilter("monFiltreDynamique")
@@ -77,4 +78,11 @@ public class Product {
                 ", prix=" + prix +
                 '}';
     }
+
+    public static Comparator<Product> ComparatorNom = new Comparator<Product>() {
+        @Override
+        public int compare(Product o1, Product o2) {
+            return o1.getNom().compareTo(o2.getNom());
+        }
+    };
 }

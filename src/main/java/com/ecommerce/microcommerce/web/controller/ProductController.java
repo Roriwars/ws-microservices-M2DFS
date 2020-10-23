@@ -8,6 +8,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,19 +37,19 @@ public class ProductController {
 
 
     //Récupérer la liste des produits
-    @RequestMapping(value = "/getProducts", method = RequestMethod.GET)
+    @RequestMapping(value = "/getProduits", method = RequestMethod.GET)
     public List<Product> listeProduits() {
         return productList;
     }
 
     //Récupérer un produit par son Id
-    @GetMapping("/getProductById/{id}")
+    @GetMapping("/getProduitById/{id}")
     public Product afficherUnProduit(@PathVariable(value = "id") int id) {
         return productList.stream().filter(product -> product.getId() == id).collect(Collectors.toList()).get(0);
     }
 
     //ajouter un produit
-    @PostMapping(value = "/addProduct")
+    @PostMapping(value = "/addProduit")
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
         productList.add(product);
@@ -67,14 +68,14 @@ public class ProductController {
     }
 
     // supprimer un produit
-    @DeleteMapping("deleteProductById")
+    @DeleteMapping("deleteProduitById")
     public void supprimerProduit(@PathVariable(value = "id") int id) {
         Product produitSupp = productList.stream().filter(product -> product.getId() == id).collect(Collectors.toList()).get(0);
         productList.remove(produitSupp);
     }
 
     // Mettre à jour un produit
-    @PostMapping("updateProduct")
+    @PostMapping("updateProduit")
     public void updateProduit(@RequestBody Product product) {
         productList.set( product.getId() , product);
     }
@@ -88,6 +89,13 @@ public class ProductController {
         return listeMarge;
     }
 
+    @GetMapping("getProduitsTrier")
+    public List<Product> trierProduitsParOrdreAlphabetique() {
+
+        List<Product> produitsTrier = productList;
+        Collections.sort(produitsTrier,Product.ComparatorNom);
+        return produitsTrier;
+    }
 
     //Pour les tests
     /*@GetMapping(value = "test/produits/{prix}")
